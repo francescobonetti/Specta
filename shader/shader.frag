@@ -7,30 +7,68 @@ precision highp float;
 varying vec2 vUV;
 
 uniform sampler2D tex;
+uniform sampler2D noiseTex;
 
 uniform float time;
 uniform float frequency;
 uniform float amplitude;
 uniform float stretch;
+uniform float screenWidth;
+uniform float screenHeight;
+
+
+vec4 debugValue(float value) {
+  vec4 col;
+  if (value < 0.0) {
+    col = vec4(1.0, 0.0, 0.0, 1.0);
+  } else if (value <= 1.0) {
+    col =  vec4(vec3(value), 1.0);
+  } else {
+    col = vec4(0.0, 1.0, 0.0, 1.0);
+  }
+
+  return col;
+}
+
+
 
 void main() {
-  vec2 uv = vec2(0.0) - vUV;
-  uv.x = uv.x * -1.0;
+  // UV
+  vec2 uv = vec2(vUV.x, 1.0 - vUV.y);
 
+
+  // vec2 uv = vec2(0.0) - vUV;
+  // uv.x = uv.x * -1.0;
+
+  // float sineWave = sin(uv.x * frequency) * amplitude * sin(time);
+
+  // float weight = sin(uv.y * -2.0) * 0.5 + 0.5;
+  // float stretchpoint = 1.0 - stretch;
+
+  // vec2 distort = vec2(0 , sineWave);
+  // uv += distort;
+
+  // Distort
   float sineWave = sin(uv.x * frequency) * amplitude * sin(time);
+  //float noise = texture2D(noiseTex, uv + time).r * texture2D(noiseTex, uv - time).r * stretch * 0.5;
+  vec2 distort = vec2(0, sineWave);
+
+  uv -= distort;
+  
+  // uv += noise * amplitude;
+
+  // Stretch
+  float powerExp = 4.0 * (1.0 - stretch) + 1.0;
+  uv.x = uv.x - pow(uv.x * 0.5, powerExp) * 2.0;
+
+  // Mirror repeat
+  uv = abs(mod(uv * 1.0 + 1.0, 2.0) - 1.0);
 
 
-  float weight = sin(uv.y * -2.0) * 0.5 + 0.5;
+  // gl_FragColor = debugValue(uv.x);
+  gl_FragColor = texture2D(tex, uv);
+  // gl_FragColor = debugValue(noise);
 
-  float stretchpoint = 1.0 - stretch;
-
-  vec2 distort = vec2(0 , sineWave * weight);
-
-  uv.x *= 1.0 - stretch;
-
-  vec4 texColor = texture2D(tex, mod(uv + distort, 1.0));
-
-  gl_FragColor = texColor;
 }
 
 

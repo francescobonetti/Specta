@@ -49,7 +49,7 @@ void main() {
   // uv += distort;
 
   // Distort
-  float sineWave = sin(uv.x * frequency) * amplitude * sin(time);
+  float sineWave = sin(uv.x * frequency) * amplitude; //* sin(time);
   //float noise = texture2D(noiseTex, uv + time).r * texture2D(noiseTex, uv - time).r * stretch * 0.5;
   vec2 distort = vec2(0, sineWave);
 

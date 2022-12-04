@@ -6,11 +6,13 @@ let clicked = false; //variabile che attiva o disattiva la distorsione dell'imma
 let stretch = 0; //variabile che va da 0 a 1, che passata allo shader determina lo stretch
 let stretchcounter = 0; //come un framecount ma solo per determinare la durata dell'animazione di stretch
 let distortcounter = 0; //come un framecount ma solo per determinare la durata dell'animazione di distorsione sinusoidale
-let ineasing = 0.05;
+let ineasing = 0.01;
 let outeasing = 0.02;
 
 let freq = 0;
 let amp = 0;
+let xpos = 0;
+let yAngleArray = [];
 
 //variabili arduino
 let serial;
@@ -87,7 +89,6 @@ function gotData() {
   let currentString = serial.readLine();
   trim(currentString);
   if (!currentString) return;
-  //console.log(currentString);
   latestData = currentString;
 }
 
@@ -96,18 +97,19 @@ function vidLoad() {
   video.volume(0);
 }
 
-function mouseClicked() {
+function keyPressed()  {
   //cambia la variabile clicked
-
-  if (clicked == false) {
+  if (key == ' '){
+    if (clicked == false) {
     clicked = true;
-  } else {
+    } else {
     clicked = false;
+    } 
   }
 }
 
 function draw() {
-  let goalfreq; //frequenza che l'onda deve raggiungere quando clicco. Mi serve a non fare uno stacco netto ma usare un lerp per arrivarci
+  let goalfreq; //frequenza che l'onda deve raggiungere quando clicco
   let goalamp; //stesso ma per l'altezza (amplitude) dell'onda
 
   const angleArray = latestData.split(" ");
@@ -115,14 +117,13 @@ function draw() {
   let myAngleX = +angleArray[0];
   let myAngleY = +angleArray[1];
   let myAngleZ = +angleArray[2];
-  /*
-  console.log(angleArray[0]);
-  console.log(angleArray[1]);
-  console.log(angleArray[2]);
-  */
-  console.log(abs(myAngleX));
-  //console.log(abs(myAngleY));
-  //console.log(myAngleZ);
+  
+
+  let amplitudeAngle = -myAngleX
+  let xposangle = myAngleY
+
+  
+
 
   if (clicked == true) {
     //accensione dispositivo
@@ -137,8 +138,13 @@ function draw() {
 
       distortcounter += 0.005; //ora che l'immagine è stretchata, parte il counter di tempo della distorsione sinusoidale
 
-      goalfreq = map(abs(myAngleY), 0, 180, 5.0, 10.0); //la frequenza a cui arrivare dipende dalla mouseY
-      goalamp = map(myAngleX, 0, 120, 0.2, 0.5); //l'altezza a cui arrivare dipende dalla mouseX
+      goalfreq = 1.5 * sin(frameCount * 0.001) + 3
+      //goalfreq = map(frequencyAngle, 0, 180, 3.0, 5.0); //la frequenza a cui arrivare dipende dalla mouseY
+      goalamp = map(amplitudeAngle, -90, 90, -0.8, 0.8, true); //l'altezza a cui arrivare dipende dalla mouseX
+      //goalamp = map(mouseX, 0, width, 0.05, 0.5);
+      //goalfreq = map(mouseY, 0, height, 5.0, 10.0);
+      goalxpos = map(xposangle, -90, 90, -10.0, 10.0, true)
+      
 
       let d_freq = goalfreq - freq;
       freq += d_freq * ineasing;
@@ -146,9 +152,12 @@ function draw() {
       let d_amp = goalamp - amp;
       amp += d_amp * ineasing;
 
+      let d_xpos = goalxpos - xpos;
+      xpos += d_xpos * ineasing;
+
       myShader.setUniform("frequency", freq);
       myShader.setUniform("amplitude", amp);
-      myShader.setUniform("time", stretchcounter * 0.005); //crea piccole variazioni per non tenere l'onda statica
+      myShader.setUniform("xpos", xpos);
 
       if (distortcounter > 1) {
         distortcounter = 1;
@@ -158,9 +167,6 @@ function draw() {
     //spegnimento dispositivo
 
     distortcounter -= 0.005; //diminuisce fino ad arrivare a 0 per diminuire la distorsione sinusoidale
-
-    //let backfreq = lerp(0, freq, distortcounter); //ho dovuto creare una nuova variabile per il ritorno per non fare casini col lerp inserendo due volte freq. Comunque è un lerp che parte dalla frequenza attuale e va a 0
-    //let backamp = lerp(0, amp, distortcounter);  //stesso per l'altezza
 
     goalfreq = 0;
     goalamp = 0;
@@ -192,10 +198,7 @@ function draw() {
 
   myShader.setUniform("stretch", stretch);
   myShader.setUniform("time", frameCount * 0.001);
-
-  //console.log(distortcounter);
-  //console.log(stretch)
-  //console.log(clicked)
+  myShader.setUniform("distortcounter", distortcounter);
 
   rect(0, 0, width, height);
 }

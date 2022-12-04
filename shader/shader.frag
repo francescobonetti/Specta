@@ -10,8 +10,10 @@ uniform sampler2D tex;
 uniform sampler2D noiseTex;
 
 uniform float time;
+uniform float distortcounter;
 uniform float frequency;
 uniform float amplitude;
+uniform float xpos;
 uniform float stretch;
 uniform float screenWidth;
 uniform float screenHeight;
@@ -49,11 +51,11 @@ void main() {
   // uv += distort;
 
   // Distort
-  float sineWave = sin(uv.x * frequency) * amplitude; //* sin(time);
-  //float noise = texture2D(noiseTex, uv + time).r * texture2D(noiseTex, uv - time).r * stretch * 0.5;
+  float noise = texture2D(noiseTex, uv + 0.5 * sin(time)).r * texture2D(noiseTex, uv - 0.5 * sin(time)).r * 0.2 * distortcounter;
+  float sineWave = sin(2.0 * uv.x * frequency - 0.5 * frequency + xpos) * amplitude - 1.5 *  sin(uv.x * frequency - 0.5 + noise) * amplitude + amplitude; //* sin(time);
   vec2 distort = vec2(0, sineWave);
 
-  uv -= distort;
+  uv += distort;
   
   // uv += noise * amplitude;
 

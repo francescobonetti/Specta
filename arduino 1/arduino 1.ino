@@ -21,7 +21,7 @@ float x,y,z;
 void loop() {
   mpu6050.update();
   dt = millis() -t1;
-  if (dt > 100) {
+  if (dt > 200) {
     t1 = millis();
     x = mpu6050.getAngleX(); 
     y = mpu6050 .getAngleY(); 

@@ -51,8 +51,8 @@ void main() {
   // uv += distort;
 
   // Distort
-  float noise = texture2D(noiseTex, uv + 0.5 * sin(time)).r * texture2D(noiseTex, uv - 0.5 * sin(time)).r * 0.2 * distortcounter;
-  float sineWave = sin(2.0 * uv.x * frequency - 0.5 * frequency + xpos) * amplitude - 1.5 *  sin(uv.x * frequency - 0.5 + noise) * amplitude + amplitude; //* sin(time);
+  //float noise = texture2D(noiseTex, uv + 0.5 * sin(time)).r * texture2D(noiseTex, uv - 0.5 * sin(time)).r * 0.2 * distortcounter;
+  float sineWave = sin(2.0 * uv.x * frequency - 0.5 * frequency + xpos) * amplitude - 1.5 *  sin(uv.x * frequency - 0.5) * amplitude; //+ amplitude; //* sin(time);
   vec2 distort = vec2(0, sineWave);
 
   uv += distort;

@@ -6,13 +6,13 @@ let clicked = false; //variabile che attiva o disattiva la distorsione dell'imma
 let stretch = 0; //variabile che va da 0 a 1, che passata allo shader determina lo stretch
 let stretchcounter = 0; //come un framecount ma solo per determinare la durata dell'animazione di stretch
 let distortcounter = 0; //come un framecount ma solo per determinare la durata dell'animazione di distorsione sinusoidale
-let ineasing = 0.01;
-let outeasing = 0.02;
+
 
 let freq = 0;
 let amp = 0;
 let xpos = 0;
-let yAngleArray = [];
+
+let baseAngleZ;
 
 //variabili arduino
 let serial;
@@ -98,10 +98,13 @@ function vidLoad() {
 }
 
 function keyPressed()  {
+  const angleArray = latestData.split(" ");
+
   //cambia la variabile clicked
   if (key == ' '){
     if (clicked == false) {
     clicked = true;
+    baseAngleZ = +angleArray[2];
     } else {
     clicked = false;
     } 
@@ -109,6 +112,10 @@ function keyPressed()  {
 }
 
 function draw() {
+  let ineasing = 0.01;
+  let outeasing = 0.02;
+
+ 
   let goalfreq; //frequenza che l'onda deve raggiungere quando clicco
   let goalamp; //stesso ma per l'altezza (amplitude) dell'onda
 
@@ -116,13 +123,13 @@ function draw() {
 
   let myAngleX = +angleArray[0];
   let myAngleY = +angleArray[1];
-  let myAngleZ = +angleArray[2];
-  
+  let myAngleZ = +angleArray[2] - baseAngleZ;
+
 
   let amplitudeAngle = -myAngleX
-  let xposangle = myAngleY
-
+  let xposangle = myAngleZ
   
+
 
 
   if (clicked == true) {
@@ -139,17 +146,16 @@ function draw() {
       distortcounter += 0.005; //ora che l'immagine è stretchata, parte il counter di tempo della distorsione sinusoidale
 
       goalfreq = 1.5 * sin(frameCount * 0.001) + 3
-      //goalfreq = map(frequencyAngle, 0, 180, 3.0, 5.0); //la frequenza a cui arrivare dipende dalla mouseY
-      goalamp = map(amplitudeAngle, -90, 90, -0.8, 0.8, true); //l'altezza a cui arrivare dipende dalla mouseX
-      //goalamp = map(mouseX, 0, width, 0.05, 0.5);
-      //goalfreq = map(mouseY, 0, height, 5.0, 10.0);
-      goalxpos = map(xposangle, -90, 90, -10.0, 10.0, true)
+      goalamp = map(amplitudeAngle, -90, 90, -1.0, 1.0, true); //l'altezza a cui arrivare dipende dalla mouseX
+      goalxpos = map(xposangle, -180, 180, -10.0, 10.0)
       
 
       let d_freq = goalfreq - freq;
       freq += d_freq * ineasing;
 
+
       let d_amp = goalamp - amp;
+      //ineasing = map(abs(d_amp), 0, 0.5, 0.05, 0.005, true)
       amp += d_amp * ineasing;
 
       let d_xpos = goalxpos - xpos;

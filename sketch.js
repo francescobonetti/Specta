@@ -11,8 +11,8 @@ let distortcounter = 0; //come un framecount ma solo per determinare la durata d
 let freq = 0;
 let amp = 0;
 let xpos = 0;
-
-let baseAngleZ;
+let whiteNoise;
+let baseAngleZ; 
 
 //variabili arduino
 let serial;
@@ -20,13 +20,15 @@ let latestData = "waiting for data";
 
 function preload() {
   myShader = loadShader("shader/shader.vert", "shader/shader.frag");
-  video = createVideo(["News.mp4"], vidLoad);
-  //video = loadImage('img.jpg');
+  video = createVideo(["primo-video-pres.mp4"], vidLoad);
+  whiteNoise = createAudio("whitenoise-short.mp3")
   noiseImg = loadImage("noiseTexture.png");
+  console.log(whiteNoise)
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
+  whiteNoise.loop()
 
   video.hide(); //nasconde il video, altrimenti p5 lo mostrerebbe sotto
 
@@ -94,7 +96,6 @@ function gotData() {
 
 function vidLoad() {
   video.loop();
-  video.volume(0);
 }
 
 function keyPressed()  {
@@ -112,6 +113,10 @@ function keyPressed()  {
 }
 
 function draw() {
+
+  video.volume(1 - stretch)
+  whiteNoise.volume(stretch)
+
   let ineasing = 0.01;
   let outeasing = 0.02;
 
